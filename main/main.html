@@ -59,11 +59,6 @@ import { DRACOLoader }    from '../vendor/three/examples/jsm/loaders/DRACOLoader
 import { MeshoptDecoder } from '../vendor/three/examples/jsm/libs/meshopt_decoder.module.js';
 import { OrbitControls }  from '../vendor/three/examples/jsm/controls/OrbitControls.js';
 
-const loader = new GLTFLoader();
-const draco  = new DRACOLoader();
-draco.setDecoderPath('../vendor/three/examples/jsm/libs/draco/'); // ← 폴더 경로(슬래시 포함)
-loader.setDRACOLoader(draco);
-loader.setMeshoptDecoder(MeshoptDecoder);
 
 
 const canvas   = document.getElementById('stage');
@@ -182,6 +177,7 @@ renderer.setAnimationLoop(() => {
 
 </body>
 </html>
+
 
 
 
