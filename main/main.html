@@ -98,7 +98,7 @@ scene.add(ground);
 /* ✅ GLTF 로더 + (압축 대응) 디코더 설정 */
 const loader = new GLTFLoader();
 const draco = new DRACOLoader();
-draco.setDecoderPath('https://unpkg.com/three@0.160.0/examples/jsm/libs/draco/');
+draco.setDecoderPath('../vendor/three/examples/jsm/libs/draco/'); // ← 반드시 슬래시로 끝나야 함
 loader.setDRACOLoader(draco);
 loader.setMeshoptDecoder(MeshoptDecoder);
 
@@ -177,6 +177,7 @@ renderer.setAnimationLoop(() => {
 
 </body>
 </html>
+
 
 
 
