@@ -52,10 +52,12 @@ body{
 <div class="badge">GAS</div>
 
 <script type="module">
-/* three.js + 로더 */
+<script type="module">
 import * as THREE from 'https://unpkg.com/three@0.160.0/build/three.module.js';
-import { GLTFLoader } from 'https://unpkg.com/three@0.160.0/examples/jsm/loaders/GLTFLoader.js';
-import { OrbitControls } from 'https://unpkg.com/three@0.160.0/examples/jsm/controls/OrbitControls.js';
+import { GLTFLoader }      from 'https://unpkg.com/three@0.160.0/examples/jsm/loaders/GLTFLoader.js';
+import { DRACOLoader }     from 'https://unpkg.com/three@0.160.0/examples/jsm/loaders/DRACOLoader.js';
+import { MeshoptDecoder }  from 'https://unpkg.com/three@0.160.0/examples/jsm/libs/meshopt_decoder.module.js';
+import { OrbitControls }   from 'https://unpkg.com/three@0.160.0/examples/jsm/controls/OrbitControls.js';
 
 const canvas   = document.getElementById('stage');
 const renderer = new THREE.WebGLRenderer({ canvas, antialias:true, alpha:true });
@@ -73,7 +75,7 @@ camera.position.set(4, 2.5, 6);
 const controls = new OrbitControls(camera, renderer.domElement);
 controls.enableDamping = true;
 
-/* 라이트(은은한 회색 재질에 맞춤) */
+/* 라이트 */
 scene.add(new THREE.HemisphereLight(0xffffff, 0x202030, 0.8));
 const dir = new THREE.DirectionalLight(0xffffff, 1.0);
 dir.position.set(5, 6, 4);
@@ -81,7 +83,7 @@ dir.castShadow = true;
 dir.shadow.mapSize.set(1024,1024);
 scene.add(dir);
 
-/* 지면 살짝(그림자 받도록) — 필요없으면 주석 */
+/* 그림자 바닥(선택) */
 const ground = new THREE.Mesh(
   new THREE.PlaneGeometry(200,200),
   new THREE.ShadowMaterial({ opacity:0.22 })
@@ -91,46 +93,63 @@ ground.position.y = -0.01;
 ground.receiveShadow = true;
 scene.add(ground);
 
-// ✅ GLB URL을 절대경로로 생성 (배포/개발 모두 안정적)
-const MODEL_URL = new URL('../assets/solar.glb', import.meta.url).href;
-console.log('GLB URL:', MODEL_URL);
+/* ✅ GLTF 로더 + (압축 대응) 디코더 설정 */
+const loader = new GLTFLoader();
+const draco = new DRACOLoader();
+draco.setDecoderPath('https://unpkg.com/three@0.160.0/examples/jsm/libs/draco/');
+loader.setDRACOLoader(draco);
+loader.setMeshoptDecoder(MeshoptDecoder);
 
+/* 모델 URL (절대경로화 + 캐시버스터) */
+const MODEL_URL = new URL('../assets/solar.glb', import.meta.url).href + `?v=${Date.now()}`;
+console.log('GLB URL →', MODEL_URL);
+
+/* 로드 */
 loader.load(
   MODEL_URL,
-  (gltf)=>{ /* ... 기존 onLoad ... */ },
-  undefined,
-  (err)=>{ console.error('GLB 로드 실패:', err); }
+  (gltf) => {
+    const root = gltf.scene || gltf.scenes?.[0];
+    if (!root) { console.error('GLB: scene 없음'); return; }
+
+    applyUniformGray(root, 0xb8bcc2); // ← 회색 톤
+    root.traverse(o => { if (o.isMesh) { o.castShadow = true; o.receiveShadow = true; } });
+    scene.add(root);
+    frameToObject(root, camera, controls);
+  },
+  (ev) => {
+    if (ev.total) {
+      const pct = (ev.loaded / ev.total * 100).toFixed(1);
+      // console.log(`loading ${pct}%`);
+    }
+  },
+  (err) => {
+    console.error('GLB 로드 실패:', err);
+  }
 );
 
-
-/* 모든 메시를 동일한 회색 표면으로 */
+/* 회색 재질 강제 적용 */
 function applyUniformGray(root, hex){
-  const mat = new THREE.MeshStandardMaterial({
-    color: hex, roughness:0.88, metalness:0.05
-  });
+  const mat = new THREE.MeshStandardMaterial({ color:hex, roughness:0.88, metalness:0.05 });
   root.traverse(obj => {
     if (obj.isMesh) {
-      // 기존 재질/텍스처 메모리 정리
       if (obj.material) {
-        if (obj.material.map) obj.material.map.dispose?.();
-        obj.material.dispose?.();
+        try { obj.material.map?.dispose?.(); obj.material.dispose?.(); } catch {}
       }
       obj.material = mat.clone();
     }
   });
 }
 
-/* 모델 크기에 맞춰 카메라/컨트롤 프레이밍 */
+/* 모델에 맞춘 카메라 프레이밍 */
 function frameToObject(object, camera, controls){
   const box = new THREE.Box3().setFromObject(object);
   const size = box.getSize(new THREE.Vector3());
   const center = box.getCenter(new THREE.Vector3());
-
-  const maxDim = Math.max(size.x, size.y, size.z);
+  const maxDim = Math.max(size.x, size.y, size.z) || 1;
   const fitDist = maxDim / (2 * Math.tan(THREE.MathUtils.degToRad(camera.fov * 0.5)));
   const dist = fitDist * 1.3;
 
-  const dir = new THREE.Vector3(1, 0.6, 1).normalize(); // 보기 좋은 대각
+  const dir = new THREE.Vector3(1, 0.6, 1).normalize();
   camera.position.copy(center).add(dir.multiplyScalar(dist));
   camera.near = dist/100;
   camera.far  = dist*100;
@@ -148,13 +167,13 @@ addEventListener('resize', () => {
 });
 
 /* 루프 */
-let t = 0;
 renderer.setAnimationLoop(() => {
-  t += 0.01;
   controls.update();
   renderer.render(scene, camera);
 });
 </script>
+
 </body>
 </html>
+
 
