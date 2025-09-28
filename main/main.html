@@ -1,4 +1,3 @@
-
 <!doctype html>
 <html lang="ko">
 <head>
@@ -13,7 +12,7 @@
   --ink:#f4f7fb;
   --ink-muted:#b7c0cf;
   --accent:#74F8F6;
-  --bg-img:url("../assets/bg.png"); /* 필요시 교체 */
+  --bg-img:url("../assets/bg.png");
 }
 *{box-sizing:border-box}
 html,body{height:100%}
@@ -22,7 +21,6 @@ body{
   font-family:"Noto Sans KR", system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
   overflow:hidden;
 }
-/* 배경 (랜딩과 동일 톤) */
 .bg{
   position:fixed; inset:0; z-index:0;
   background-image:
@@ -32,7 +30,6 @@ body{
   background-size:cover; background-position:center; background-repeat:no-repeat;
   filter:contrast(105%) brightness(96%);
 }
-/* 상단 좌측 홈 버튼(선택) */
 .home{
   position:fixed; left:16px; top:16px; z-index:3;
   display:inline-flex; align-items:center; gap:8px; height:28px; padding:0 12px;
@@ -40,11 +37,19 @@ body{
   color:#9adfe3; border:1px solid rgba(130,255,250,.35); background:rgba(255,255,255,.03); border-radius:6px;
 }
 .home .chev{ width:8px; height:8px; transform:rotate(135deg); border-top:2px solid currentColor; border-right:2px solid currentColor; }
-
-/* 캔버스 풀스크린 */
 #stage{ position:fixed; inset:0; z-index:1; display:block; }
 .badge{position:fixed; right:8px; top:4px; z-index:3; font:700 10px/1 "Zen Dots",sans-serif; color:#9097a3; letter-spacing:.1em; opacity:.85}
 </style>
+
+<!-- ✅ 추가: import map (JSM 내부의 `from "three"` 해석용) -->
+<script type="importmap">
+{
+  "imports": {
+    "three": "../vendor/three/build/three.module.js",
+    "three/examples/jsm/": "../vendor/three/examples/jsm/"
+  }
+}
+</script>
 </head>
 <body>
 <div class="bg" aria-hidden="true"></div>
@@ -58,8 +63,6 @@ import { GLTFLoader }     from '../vendor/three/examples/jsm/loaders/GLTFLoader.
 import { DRACOLoader }    from '../vendor/three/examples/jsm/loaders/DRACOLoader.js';
 import { MeshoptDecoder } from '../vendor/three/examples/jsm/libs/meshopt_decoder.module.js';
 import { OrbitControls }  from '../vendor/three/examples/jsm/controls/OrbitControls.js';
-
-
 
 const canvas   = document.getElementById('stage');
 const renderer = new THREE.WebGLRenderer({ canvas, antialias:true, alpha:true });
@@ -95,10 +98,10 @@ ground.position.y = -0.01;
 ground.receiveShadow = true;
 scene.add(ground);
 
-/* ✅ GLTF 로더 + (압축 대응) 디코더 설정 */
+/* GLTF 로더 + (압축 대응) 디코더 설정 */
 const loader = new GLTFLoader();
-const draco = new DRACOLoader();
-draco.setDecoderPath('../vendor/three/examples/jsm/libs/draco/'); // ← 반드시 슬래시로 끝나야 함
+const draco  = new DRACOLoader();
+draco.setDecoderPath('../vendor/three/examples/jsm/libs/draco/'); // ← 슬래시 필수
 loader.setDRACOLoader(draco);
 loader.setMeshoptDecoder(MeshoptDecoder);
 
@@ -113,20 +116,13 @@ loader.load(
     const root = gltf.scene || gltf.scenes?.[0];
     if (!root) { console.error('GLB: scene 없음'); return; }
 
-    applyUniformGray(root, 0xb8bcc2); // ← 회색 톤
+    applyUniformGray(root, 0xb8bcc2); // 회색 톤
     root.traverse(o => { if (o.isMesh) { o.castShadow = true; o.receiveShadow = true; } });
     scene.add(root);
     frameToObject(root, camera, controls);
   },
-  (ev) => {
-    if (ev.total) {
-      const pct = (ev.loaded / ev.total * 100).toFixed(1);
-      // console.log(`loading ${pct}%`);
-    }
-  },
-  (err) => {
-    console.error('GLB 로드 실패:', err);
-  }
+  undefined,
+  (err) => { console.error('GLB 로드 실패:', err); }
 );
 
 /* 회색 재질 강제 적용 */
@@ -134,9 +130,7 @@ function applyUniformGray(root, hex){
   const mat = new THREE.MeshStandardMaterial({ color:hex, roughness:0.88, metalness:0.05 });
   root.traverse(obj => {
     if (obj.isMesh) {
-      if (obj.material) {
-        try { obj.material.map?.dispose?.(); obj.material.dispose?.(); } catch {}
-      }
+      try { obj.material?.map?.dispose?.(); obj.material?.dispose?.(); } catch {}
       obj.material = mat.clone();
     }
   });
@@ -177,10 +171,3 @@ renderer.setAnimationLoop(() => {
 
 </body>
 </html>
-
-
-
-
-
-
-
