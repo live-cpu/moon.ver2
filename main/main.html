@@ -1,3 +1,4 @@
+
 <!doctype html>
 <html lang="ko">
 <head>
@@ -52,7 +53,11 @@ body{
 <div class="badge">GAS</div>
 
 <script type="module">
-<script type="module">
+const url = 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js';
+console.log('check', await fetch(url, {method:'HEAD'}).then(r=>r.status).catch(e=>e.message));
+
+const THREE = await import('https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js');
+const { GLTFLoader } = await import('https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/loaders/GLTFLoader.js');
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js';
 import { GLTFLoader }     from 'https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/loaders/GLTFLoader.js';
 import { DRACOLoader }    from 'https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/loaders/DRACOLoader.js';
@@ -176,6 +181,7 @@ renderer.setAnimationLoop(() => {
 
 </body>
 </html>
+
 
 
 
