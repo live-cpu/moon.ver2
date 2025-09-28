@@ -1,0 +1,216 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>월면계획 v2 — FAQ</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Zen+Dots&family=Noto+Sans+KR:wght@400;600&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  --ink:#f4f7fb;
+  --ink-muted:#b7c0cf;
+  --accent:#74F8F6;
+  --orbit:rgba(255,255,255,.18);
+  --maxw:1200px;
+
+  /* ✅ 프로젝트 구조에 맞춰 경로 확인 */
+  --bg-img:url("../assets/bg.png");
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0; color:var(--ink); background:#07080b;
+  font-family:"Noto Sans KR",system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+  overflow:hidden;
+}
+
+/* === 배경 === */
+.bg{
+  position:fixed; inset:0; z-index:0;
+  background-image:
+    radial-gradient(1200px 800px at 70% 30%, rgba(0,0,0,.2), rgba(0,0,0,0) 60%),
+    linear-gradient(180deg, rgba(0,0,0,.55), rgba(0,0,0,.35) 40%, rgba(0,0,0,.65)),
+    var(--bg-img);
+  background-size:cover; background-position:center; background-repeat:no-repeat;
+  filter:contrast(105%) brightness(96%);
+}
+
+/* === 우주 궤도 라인 === */
+.orbits{
+  position:fixed; inset:0; z-index:1; pointer-events:none; opacity:.9;
+}
+.ring{
+  position:absolute; left:50%; top:50%;
+  width:var(--size); height:var(--size); border-radius:50%;
+  border:1px solid var(--orbit);
+  transform:translate(-50%,-50%) rotate(var(--rot)) scaleY(var(--sy));
+  animation:spin var(--dur) linear infinite;
+  filter:blur(.25px);
+}
+@keyframes spin{
+  to{ transform:translate(-50%,-50%) rotate(calc(var(--rot) + 360deg)) scaleY(var(--sy)); }
+}
+.r1{ --size:2200px; --sy:.62; --rot: 8deg;  --dur:260s }
+.r2{ --size:1850px; --sy:.64; --rot:18deg;  --dur:240s }
+.r3{ --size:1550px; --sy:.66; --rot:28deg;  --dur:220s }
+.r4{ --size:1280px; --sy:.68; --rot:38deg;  --dur:200s }
+.r5{ --size:1020px; --sy:.70; --rot:48deg;  --dur:180s }
+.r6{ --size: 820px; --sy:.72; --rot:58deg;  --dur:160s }
+
+/* === 좌측 네온 글래스 패널 === */
+.panel{
+  position:fixed; z-index:2;
+  left:6vw; top:6svh;
+  width:clamp(260px,28vw,420px);
+  border:1px solid rgba(130,255,250,.35);
+  border-radius:10px;
+  background:linear-gradient(180deg, rgba(125,255,248,.10), rgba(125,255,248,.04));
+  box-shadow:0 0 28px rgba(108,246,244,.22), inset 0 0 26px rgba(108,246,244,.10);
+  backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px);
+  overflow:hidden;
+}
+.panel-head{
+  padding:14px 16px 10px;
+  border-bottom:1px solid rgba(255,255,255,.08);
+}
+a.home{
+  display:inline-flex; align-items:center; gap:8px;
+  height:26px; padding:0 10px;
+  font:700 11px/1 "Zen Dots",sans-serif; letter-spacing:.12em; text-decoration:none;
+  color:#9adfe3; border:1px solid rgba(130,255,250,.3);
+  background:rgba(255,255,255,.03); border-radius:6px;
+}
+a.home .chev{
+  width:8px; height:8px; transform:rotate(135deg);
+  border-top:2px solid currentColor; border-right:2px solid currentColor;
+}
+.title{
+  margin-top:8px;
+  font:700 28px/1 "Zen Dots",sans-serif;
+  color:#bafaff; letter-spacing:.08em;
+  text-shadow:
+    0 0 0px rgba(255,255,255,.85),
+    0 0 60px rgba(255,255,255,.4),
+    0 0 80px rgba(116,248,246,.35);
+}
+
+/* 상단 작은 링크 */
+
+
+/* === FAQ 리스트 === */
+.faq{
+  padding:10px; max-height:min(62svh, 520px); overflow:auto;
+}
+.faq::-webkit-scrollbar{ width:8px }
+.faq::-webkit-scrollbar-thumb{ background:rgba(255,255,255,.15); border-radius:8px }
+
+.qa{
+  margin:8px 0; border:1px solid rgba(255,255,255,.10);
+  background:rgba(255,255,255,.02); border-radius:8px; overflow:hidden;
+}
+.qa[open]{ border-color:rgba(116,248,246,.65); box-shadow:inset 0 0 22px rgba(116,248,246,.18), 0 0 18px rgba(116,248,246,.20) }
+.qa summary{
+  list-style:none; cursor:pointer; padding:14px 14px; position:relative;
+  font-weight:600; color:var(--ink); outline:none;
+  display:flex; align-items:center; gap:10px;
+}
+.qa summary::-webkit-details-marker{ display:none }
+.qa summary .caret{
+  margin-left:auto; width:8px; height:8px; transition:transform .2s ease;
+  border-right:2px solid var(--ink); border-top:2px solid var(--ink); transform:rotate(45deg);
+  opacity:.85;
+}
+.qa[open] summary .caret{ transform:rotate(225deg) }
+.qa .answer{
+  padding:0 14px 14px; font-size:13px; line-height:1.7; color:var(--ink-muted);
+}
+
+/* === 하단 크레딧 & 우상단 배지 === */
+.footer{position:fixed; left:24px; bottom:24px; z-index:2; font-size:13px; color:var(--ink-muted)}
+.footer p{margin:.2em 0}
+.badge{position:fixed; right:8px; top:4px; z-index:3; font:700 10px/1 "Zen Dots",sans-serif; color:#9097a3; letter-spacing:.1em; opacity:.85}
+
+/* === 반응형 === */
+@media (max-width:980px){
+  .panel{ left:5vw; width:min(88vw,520px) }
+  .title{ font-size:24px }
+}
+@media (max-width:680px){
+  .panel{ left:4vw; right:4vw; width:auto; top:5svh }
+  .title{ font-size:22px }
+}
+</style>
+</head>
+<body>
+
+<div class="bg" aria-hidden="true"></div>
+
+<!-- 우주 궤도 -->
+<div class="orbits" aria-hidden="true">
+  <div class="ring r1"></div>
+  <div class="ring r2"></div>
+  <div class="ring r3"></div>
+  <div class="ring r4"></div>
+  <div class="ring r5"></div>
+  <div class="ring r6"></div>
+</div>
+
+<!-- 좌측 패널 -->
+<aside class="panel">
+  <div class="panel-head">
+    <a class="home" href="../index.html"><span class="chev"></span> HOME</a>
+    <div class="title">FAQ</div>
+  </div>
+
+
+
+  <div class="faq">
+    <!-- 항목 샘플: 필요에 맞게 수정/추가 -->
+    <details class="qa" open>
+      <summary>이 프로젝트는 무엇인가요? <span class="caret"></span></summary>
+      <div class="answer">
+        월면계획 v2는 랜딩 → 3D 인터랙션 → 갤러리/라이선스 페이지로 이어지는 실험적 웹입니다.
+      </div>
+    </details>
+
+    <details class="qa">
+      <summary>사이트가 무겁게 느껴지는 이유가 있나요? <span class="caret"></span></summary>
+      <div class="answer">
+        배경/입자/궤도 애니메이션과 3D 모델이 포함되어 있습니다. 모바일에서는 브라우저 탭을 최소화하고,
+        배터리 절약 모드에서는 프레임이 제한될 수 있습니다.
+      </div>
+    </details>
+
+    <details class="qa">
+      <summary>폰트/이미지 등의 출처는 어디에서 볼 수 있나요? <span class="caret"></span></summary>
+      <div class="answer">
+        좌측 상단의 <b>LICENSE</b> 페이지 링크에서 자세한 출처와 라이선스를 확인할 수 있어요.
+      </div>
+    </details>
+
+    <details class="qa">
+      <summary>문의/피드백은 어디로 보내면 되나요? <span class="caret"></span></summary>
+      <div class="answer">
+        하단 연락처(<code>hobby@114</code>)로 알려주세요. 버그 재현 스텝과 스크린샷을 포함해주시면 빠르게 대응할 수 있습니다.
+      </div>
+    </details>
+
+    <details class="qa">
+      <summary>소스는 깃허브에 업로드되나요? <span class="caret"></span></summary>
+      <div class="answer">
+        공개 저장소로 정리 예정이며, 배포 브랜치 구조와 에셋 라이선스 정책을 준수해 업로드합니다.
+      </div>
+    </details>
+  </div>
+</aside>
+
+<div class="footer">
+  <p>all rights reserved on FF14</p>
+  <p>contact : hobby@114</p>
+</div>
+
+<div class="badge">GAS</div>
+</body>
+</html>
