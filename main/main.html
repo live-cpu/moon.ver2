@@ -41,7 +41,7 @@ body{
 .badge{position:fixed; right:8px; top:4px; z-index:3; font:700 10px/1 "Zen Dots",sans-serif; color:#9097a3; letter-spacing:.1em; opacity:.85}
 </style>
 
-<!-- ✅ 추가: import map (JSM 내부의 `from "three"` 해석용) -->
+<!-- ✅ import map: JSM 내부의 `from "three"` / `from "three/examples/jsm/*"` 해석 -->
 <script type="importmap">
 {
   "imports": {
@@ -58,11 +58,12 @@ body{
 <div class="badge">GAS</div>
 
 <script type="module">
-import * as THREE from '../vendor/three/build/three.module.js';
-import { GLTFLoader }     from '../vendor/three/examples/jsm/loaders/GLTFLoader.js';
-import { DRACOLoader }    from '../vendor/three/examples/jsm/loaders/DRACOLoader.js';
-import { MeshoptDecoder } from '../vendor/three/examples/jsm/libs/meshopt_decoder.module.js';
-import { OrbitControls }  from '../vendor/three/examples/jsm/controls/OrbitControls.js';
+/* ⬇⬇⬇ 모두 bare specifier 로 통일 (import map 사용) */
+import * as THREE           from 'three';
+import { GLTFLoader }       from 'three/examples/jsm/loaders/GLTFLoader.js';
+import { DRACOLoader }      from 'three/examples/jsm/loaders/DRACOLoader.js';
+import { MeshoptDecoder }   from 'three/examples/jsm/libs/meshopt_decoder.module.js';
+import { OrbitControls }    from 'three/examples/jsm/controls/OrbitControls.js';
 
 const canvas   = document.getElementById('stage');
 const renderer = new THREE.WebGLRenderer({ canvas, antialias:true, alpha:true });
@@ -101,7 +102,7 @@ scene.add(ground);
 /* GLTF 로더 + (압축 대응) 디코더 설정 */
 const loader = new GLTFLoader();
 const draco  = new DRACOLoader();
-draco.setDecoderPath('../vendor/three/examples/jsm/libs/draco/'); // ← 슬래시 필수
+draco.setDecoderPath('../vendor/three/examples/jsm/libs/draco/'); // ← 끝에 슬래시 필수
 loader.setDRACOLoader(draco);
 loader.setMeshoptDecoder(MeshoptDecoder);
 
