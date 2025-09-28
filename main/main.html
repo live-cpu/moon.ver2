@@ -53,11 +53,12 @@ body{
 
 <script type="module">
 <script type="module">
-import * as THREE from 'https://unpkg.com/three@0.160.0/build/three.module.js';
-import { GLTFLoader }      from 'https://unpkg.com/three@0.160.0/examples/jsm/loaders/GLTFLoader.js';
-import { DRACOLoader }     from 'https://unpkg.com/three@0.160.0/examples/jsm/loaders/DRACOLoader.js';
-import { MeshoptDecoder }  from 'https://unpkg.com/three@0.160.0/examples/jsm/libs/meshopt_decoder.module.js';
-import { OrbitControls }   from 'https://unpkg.com/three@0.160.0/examples/jsm/controls/OrbitControls.js';
+import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js';
+import { GLTFLoader }     from 'https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/loaders/GLTFLoader.js';
+import { DRACOLoader }    from 'https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/loaders/DRACOLoader.js';
+import { MeshoptDecoder } from 'https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/libs/meshopt_decoder.module.js';
+import { OrbitControls }  from 'https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/controls/OrbitControls.js';
+
 
 const canvas   = document.getElementById('stage');
 const renderer = new THREE.WebGLRenderer({ canvas, antialias:true, alpha:true });
@@ -175,5 +176,6 @@ renderer.setAnimationLoop(() => {
 
 </body>
 </html>
+
 
 
