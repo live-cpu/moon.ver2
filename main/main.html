@@ -91,23 +91,17 @@ ground.position.y = -0.01;
 ground.receiveShadow = true;
 scene.add(ground);
 
-/* GLB 로드 후 "회색 재질"로 강제 적용 */
-const loader = new GLTFLoader();
+// ✅ GLB URL을 절대경로로 생성 (배포/개발 모두 안정적)
+const MODEL_URL = new URL('../assets/solar.glb', import.meta.url).href;
+console.log('GLB URL:', MODEL_URL);
+
 loader.load(
-  // main.html → ../assets/solar.glb 경로
-  '../assets/solar.glb',
-  (gltf) => {
-    const root = gltf.scene || gltf.scenes[0];
-    applyUniformGray(root, 0xb8bcc2); // ← 원하는 회색 HEX로 조정
-
-    root.traverse(o => { if (o.isMesh) { o.castShadow = true; o.receiveShadow = true; } });
-    scene.add(root);
-
-    frameToObject(root, camera, controls);
-  },
-  (e) => { /* 진행률 필요시 사용 */ },
-  (err) => { console.error('GLB 로드 실패:', err); }
+  MODEL_URL,
+  (gltf)=>{ /* ... 기존 onLoad ... */ },
+  undefined,
+  (err)=>{ console.error('GLB 로드 실패:', err); }
 );
+
 
 /* 모든 메시를 동일한 회색 표면으로 */
 function applyUniformGray(root, hex){
@@ -163,3 +157,4 @@ renderer.setAnimationLoop(() => {
 </script>
 </body>
 </html>
+
