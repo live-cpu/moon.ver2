@@ -1,0 +1,291 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>월면계획 v2 — WBO Whiteboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Zen+Dots&family=Noto+Sans+KR:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#f4f7fb;
+  --orbit:rgba(255,255,255,.18);
+  --bg-img:none;
+
+  /* 캔버스를 화면 상단에서 조금 아래에서 시작 (작은 화면에서도 안전) */
+  --safe-top: clamp(96px, 14vh, 300px);
+  --safe-left: 12px;
+  --safe-right: 12px;
+  --safe-bottom: 0px;
+}
+
+/* 베이스 */
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0; color:var(--ink); background:#07080b;
+  font-family:"Noto Sans KR",system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+  overflow:hidden;
+}
+
+/* 배경 */
+.bg{
+  position:fixed; inset:0; z-index:0;
+  background-image:
+    radial-gradient(1200px 800px at 70% 30%, rgba(0,0,0,.2), rgba(0,0,0,0) 60%),
+    linear-gradient(180deg, rgba(0,0,0,.55), rgba(0,0,0,.35) 40%, rgba(0,0,0,.65)),
+    var(--bg-img);
+  background-size:cover; background-position:center; background-repeat:no-repeat;
+  filter:contrast(105%) brightness(96%);
+}
+
+/* 궤도 */
+.orbits{ position:fixed; inset:0; z-index:1; pointer-events:none; opacity:.9; }
+.ring{
+  position:absolute; left:50%; top:50%;
+  width:var(--size); height:var(--size); border-radius:50%;
+  border:1px solid var(--orbit);
+  transform:translate(-50%,-50%) rotate(var(--rot)) scaleY(var(--sy));
+  animation:spin var(--dur) linear infinite; filter:blur(.25px);
+}
+@keyframes spin{ to{ transform:translate(-50%,-50%) rotate(calc(var(--rot) + 360deg)) scaleY(var(--sy)); } }
+.r1{ --size:2200px; --sy:.62; --rot: 8deg;  --dur:260s }
+.r2{ --size:1850px; --sy:.64; --rot:18deg;  --dur:240s }
+.r3{ --size:1550px; --sy:.66; --rot:28deg;  --dur:220s }
+.r4{ --size:1280px; --sy:.68; --rot:38deg;  --dur:200s }
+.r5{ --size:1020px; --sy:.70; --rot:48deg;  --dur:180s }
+.r6{ --size: 820px; --sy:.72; --rot:58deg;  --dur:160s }
+
+/* 임베드 영역 */
+.embed-wrap{
+  position:fixed; inset:0; z-index:2;
+  padding: var(--safe-top) var(--safe-right) var(--safe-bottom) var(--safe-left);
+  display:flex; flex-direction:column;
+}
+.embed-wrap iframe{
+  width:100%; height:100%;
+  border:0; background:transparent; flex:1;
+}
+
+/* 우측 상단 툴바 */
+.toolbar{
+  position:fixed; right:16px; top:16px; z-index:10000;
+  display:flex; gap:10px; align-items:center; flex-wrap:wrap;
+  background:rgba(0,0,0,.45); border:1px solid rgba(125,255,248,.35);
+  border-radius:10px; padding:8px 10px; backdrop-filter:blur(6px);
+  font:600 12px/1 "Noto Sans KR",sans-serif; color:#bafaff;
+  box-shadow:0 0 18px rgba(108,246,244,.18), inset 0 0 16px rgba(108,246,244,.10);
+}
+.brand{
+  display:inline-flex; align-items:center; gap:8px;
+  font:700 12px/1 "Zen Dots",sans-serif; letter-spacing:.08em; color:#9adfe3;
+}
+.chev{ width:8px; height:8px; transform:rotate(135deg); border-top:2px solid currentColor; border-right:2px solid currentColor }
+
+/* 버튼 공통 */
+.btn{
+  height:30px; padding:0 10px; border-radius:8px; border:1px solid rgba(125,255,248,.45);
+  background:rgba(255,255,255,.06); color:#dff; cursor:pointer; font-weight:700;
+  display:inline-flex; align-items:center; gap:6px; text-decoration:none;
+}
+.btn:hover{ background:rgba(255,255,255,.10) }
+
+/* 드롭다운(우측 정렬) */
+.dropdown{ position:relative }
+.dropdown-menu{
+  position:absolute; right:0; top:36px; min-width:170px; list-style:none; margin:0; padding:6px;
+  background:rgba(0,0,0,.75); border:1px solid rgba(125,255,248,.35); border-radius:10px;
+  display:none; z-index:10001;
+}
+.dropdown.open .dropdown-menu{ display:block }
+.dropdown-menu a{
+  display:block; padding:8px 10px; color:#dff; text-decoration:none; border-radius:8px;
+}
+.dropdown-menu a:hover{ background:rgba(255,255,255,.08) }
+
+/* 폴백 */
+.fallback{
+  position:fixed; inset:0; z-index:3; display:none; place-items:center; backdrop-filter:blur(2px);
+}
+.fallback .card{
+  background:rgba(0,0,0,.55); border:1px solid rgba(125,255,248,.35);
+  box-shadow:0 0 28px rgba(108,246,244,.22), inset 0 0 26px rgba(108,246,244,.10);
+  color:#dff; padding:20px; border-radius:12px; text-align:center; max-width:460px;
+  font:600 14px/1.6 "Noto Sans KR",sans-serif;
+}
+.fallback .btn{ margin-top:12px }
+
+/* 모바일 */
+@media (max-width: 920px){
+  :root{ --safe-top: 150px; --safe-right: 12px; --safe-left: 12px }
+  .toolbar{ right:12px; top:12px; max-width:calc(100vw - 24px) }
+}
+</style>
+</head>
+<body>
+
+<!-- 배경 + 궤도 -->
+<div class="bg" aria-hidden="true"></div>
+<div class="orbits" aria-hidden="true">
+  <div class="ring r1"></div><div class="ring r2"></div><div class="ring r3"></div>
+  <div class="ring r4"></div><div class="ring r5"></div><div class="ring r6"></div>
+</div>
+
+<!-- 우측 상단 툴바 -->
+<div class="toolbar" id="toolbar">
+  <span class="brand"><span class="chev"></span> WBO</span>
+
+  <!-- 드롭다운 네비 -->
+  <div class="dropdown" id="navDrop">
+    <button class="btn" id="navToggle" aria-haspopup="true" aria-expanded="false">Pages ▾</button>
+    <ul class="dropdown-menu" id="navMenu" role="menu">
+      <li><a id="goHome" href="#" role="menuitem">Main</a></li>
+      <li><a id="goLic"  href="#" role="menuitem">Licence</a></li>
+    </ul>
+  </div>
+
+  <!-- 공유/새창/관리자 -->
+  <button id="shareBtn" class="btn" title="현재 보드 링크 복사">Share</button>
+  <button id="openWindow" class="btn" title="새 창으로 열기">Open</button>
+  <button id="adminBtn" class="btn" title="관리자 토큰">Admin</button>
+</div>
+
+<!-- 임베드 -->
+<div class="embed-wrap">
+  <iframe id="wboFrame" src="" allow="clipboard-read; clipboard-write; fullscreen" referrerpolicy="no-referrer"></iframe>
+</div>
+
+<!-- 폴백 -->
+<div class="fallback" id="fallback">
+  <div class="card">
+    임베드가 차단되었거나 로드에 실패했습니다.<br>
+    아래 버튼으로 새 창에서 열어주세요.
+    <div><a class="btn" id="fallbackOpen" target="_blank" rel="noopener">WBO 보드 열기</a></div>
+  </div>
+</div>
+
+<script type="module">
+  /* ========= 공유 캔버스 보장: 공개 HTTPS 기본 + 로컬→데모 폴백 ========= */
+  const DEMO = 'https://wbo.ophir.dev';
+  const qs   = new URLSearchParams(location.search);
+  const BOARD = 'moon-v2';                    // 모두 같은 보드로 접속하면 전세계 공유
+  const LANG  = qs.get('lang') || 'ko';
+
+  function ping(base, timeout=1200){
+    return new Promise(res=>{
+      const img = new Image();
+      let done=false;
+      const end = ok => { if(!done){ done=true; clearTimeout(t); res(ok); } };
+      const t = setTimeout(()=>end(false), timeout);
+      img.onload = ()=>end(true);
+      img.onerror = ()=>end(false);
+      img.src = base.replace(/\/+$/,'') + '/favicon.ico?_=' + Date.now();
+    });
+  }
+
+  async function resolveWboBase(){
+    const override = qs.get('wbo');
+    if (override) return override;
+
+    const h = location.hostname;
+    if (h === 'localhost' || h === '127.0.0.1' || h.endsWith('.local')) {
+      const local = 'http://localhost:5001';
+      return (await ping(local)) ? local : DEMO;
+    }
+    return DEMO;
+  }
+
+  /* ========= Admin 토큰 (모더레이터/전체삭제용) ========= */
+  const adminBtn = document.getElementById('adminBtn');
+  function getAdminToken() {
+    const fromQS = qs.get('token');
+    if (fromQS) return fromQS;
+    return localStorage.getItem('wboAdminToken') || '';
+  }
+  function setAdminToken(t) {
+    if (t && t.trim()) localStorage.setItem('wboAdminToken', t.trim());
+    else localStorage.removeItem('wboAdminToken');
+    adminBtn.textContent = getAdminToken() ? 'Admin ON' : 'Admin';
+  }
+  setAdminToken(getAdminToken());
+
+  function boardURL(base, name=BOARD){
+    let url = `${base.replace(/\/+$/,'')}/boards/${encodeURIComponent(name)}?lang=${encodeURIComponent(LANG)}`;
+    const t = getAdminToken();
+    if (t) url += `&token=${encodeURIComponent(t)}`;
+    return url;
+  }
+
+  /* ========= 내부 링크 ========= */
+  const homeURL = new URL('../main/main.html',        location.href).href;
+  const licURL  = new URL('../licenses/license.html', location.href).href;
+  document.getElementById('goHome').href = homeURL;
+  document.getElementById('goLic').href  = licURL;
+
+  /* ========= 임베드 로드 & 폴백 ========= */
+  const iframe   = document.getElementById('wboFrame');
+  const fallback = document.getElementById('fallback');
+  const fbOpen   = document.getElementById('fallbackOpen');
+  let loaded = false;
+  iframe.addEventListener('load', () => { loaded = true; });
+
+  let RESOLVED_BASE = DEMO; // 공유/새창 버튼에서도 재사용
+  (async () => {
+    RESOLVED_BASE = await resolveWboBase();
+    const url  = boardURL(RESOLVED_BASE);
+    iframe.src = url;
+    fbOpen.href = url;
+    setTimeout(() => { if (!loaded) fallback.style.display = 'grid'; }, 2500);
+  })();
+
+  /* ========= 공유/새창/관리자 ========= */
+  document.getElementById('openWindow').addEventListener('click', () => {
+    window.open(boardURL(RESOLVED_BASE), '_blank', 'noopener');
+  });
+
+  document.getElementById('shareBtn').addEventListener('click', async () => {
+    const shareURL = boardURL(RESOLVED_BASE);
+    try{
+      await navigator.clipboard.writeText(shareURL);
+      const btn = document.getElementById('shareBtn');
+      const before = btn.textContent;
+      btn.textContent = 'Copied!';
+      setTimeout(()=>btn.textContent = before, 1200);
+    }catch{
+      // 폴백
+      prompt('아래 링크를 복사하세요', shareURL);
+    }
+  });
+
+  adminBtn.addEventListener('click', () => {
+    const cur = getAdminToken();
+    const t = prompt('관리자 JWT 토큰을 붙여넣으세요.\n(비우고 확인하면 토큰 제거)', cur || '');
+    if (t === null) return;
+    setAdminToken(t);
+    const url = boardURL(RESOLVED_BASE);
+    iframe.src = url; fbOpen.href = url;
+  });
+
+  /* ========= 드롭다운: 안 먹던 문제 해결 (토글/외부클릭/ESC) ========= */
+  const navDrop   = document.getElementById('navDrop');
+  const navToggle = document.getElementById('navToggle');
+  const navMenu   = document.getElementById('navMenu');
+
+  function closeMenu(){ navDrop.classList.remove('open'); navToggle.setAttribute('aria-expanded','false'); }
+  function openMenu(){  navDrop.classList.add('open');    navToggle.setAttribute('aria-expanded','true');  }
+
+  navToggle.addEventListener('click', (e) => {
+    e.stopPropagation();
+    navDrop.classList.contains('open') ? closeMenu() : openMenu();
+  });
+  document.addEventListener('click', (e) => {
+    if (!navDrop.contains(e.target)) closeMenu();
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeMenu();
+  });
+</script>
+
+<!-- 배경 이미지 제어 -->
+<script type="module" src="../../src/set-bg.js"></script>
+</body>
+</html>

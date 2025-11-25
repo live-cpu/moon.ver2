@@ -1,0 +1,242 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>월면계획 v2 — FAQ + License</title>
+<link href="https://fonts.googleapis.com/css2?family=Zen+Dots&family=Noto+Sans+KR:wght@400;600&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  --ink:#f4f7fb;
+  --ink-muted:#b7c0cf;
+  --accent:#74F8F6;
+  --orbit:rgba(255,255,255,.18);
+  --bg-img:none;
+
+  /* 🔧 패널 사이즈 & 간격 조절 */
+  --col-min: 300px;   /* 패널 최소 */
+  --col-max: 420px;   /* 패널 최대 — 여기만 바꾸면 끝 */
+  --duo-gap: 15px;    /* 패널 사이 간격 (0=딱 붙임) */
+
+  /* ✨ 폰트 사이즈 변수 (여기만 바꿔서 조절) */
+  --fs-qa-q:     14px; /* FAQ 질문(요약) */
+  --fs-qa-a:     12px; /* FAQ 답변 본문 */
+  --fs-lic-item: 14px; /* LICENSE 항목 텍스트 */
+   --fw-lic-item: 600;   /* LICENSE 본문 굵기: 500~700 중 취향대로 */
+}
+
+/* 기본 */
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0; color:var(--ink); background:#07080b;
+  font-family:"Noto Sans KR",system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+  overflow:hidden;
+}
+
+/* 배경 */
+.bg{
+  position:fixed; inset:0; z-index:0;
+  background-image:
+    radial-gradient(1200px 800px at 70% 30%, rgba(0,0,0,.2), rgba(0,0,0,0) 60%),
+    linear-gradient(180deg, rgba(0,0,0,.55), rgba(0,0,0,.35) 40%, rgba(0,0,0,.65)),
+    var(--bg-img);
+  background-size:cover; background-position:center; background-repeat:no-repeat;
+  filter:contrast(105%) brightness(96%);
+}
+
+/* 궤도 */
+.orbits{ position:fixed; inset:0; z-index:1; pointer-events:none; opacity:.9; }
+.ring{
+  position:absolute; left:50%; top:50%;
+  width:var(--size); height:var(--size); border-radius:50%;
+  border:1px solid var(--orbit);
+  transform:translate(-50%,-50%) rotate(var(--rot)) scaleY(var(--sy));
+  animation:spin var(--dur) linear infinite; filter:blur(.25px);
+}
+@keyframes spin{
+  to{ transform:translate(-50%,-50%) rotate(calc(var(--rot) + 360deg)) scaleY(var(--sy)); }
+}
+.r1{ --size:2200px; --sy:.62; --rot: 8deg;  --dur:260s }
+.r2{ --size:1850px; --sy:.64; --rot:18deg;  --dur:240s }
+.r3{ --size:1550px; --sy:.66; --rot:28deg;  --dur:220s }
+.r4{ --size:1280px; --sy:.68; --rot:38deg;  --dur:200s }
+.r5{ --size:1020px; --sy:.70; --rot:48deg;  --dur:180s }
+.r6{ --size: 820px; --sy:.72; --rot:58deg;  --dur:160s }
+
+/* ✅ 두 패널 컨테이너 (왼쪽 몰아넣기) */
+.duo{
+  position:fixed; z-index:2; top:6svh; left:6vw; right:auto;
+  display:grid;
+  grid-template-columns: repeat(2, minmax(var(--col-min), var(--col-max)));
+  gap: var(--duo-gap);
+  width: calc(var(--col-max) + var(--col-max) + var(--duo-gap));
+}
+
+/* 네온 글래스 패널 */
+.panel{
+  position:relative; width:auto;
+  border:1px solid rgba(130,255,250,.35);
+  border-radius:10px;
+  background:linear-gradient(180deg, rgba(125,255,248,.10), rgba(125,255,248,.04));
+  box-shadow:0 0 28px rgba(108,246,244,.22), inset 0 0 26px rgba(108,246,244,.10);
+  backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px);
+  overflow:hidden;
+}
+.panel-head{ padding:14px 16px 10px; border-bottom:1px solid rgba(255,255,255,.08) }
+a.home{
+  display:inline-flex; align-items:center; gap:8px; height:26px; padding:0 10px;
+  font:700 11px/1 "Zen Dots",sans-serif; letter-spacing:.12em; text-decoration:none;
+  color:#9adfe3; border:1px solid rgba(130,255,250,.3); background:rgba(255,255,255,.03); border-radius:6px;
+}
+a.home .chev{ width:8px; height:8px; transform:rotate(135deg); border-top:2px solid currentColor; border-right:2px solid currentColor }
+.title{
+  margin-top:8px; font:700 28px/1 "Zen Dots",sans-serif; color:#bafaff; letter-spacing:.08em;
+  text-shadow:0 0 0px rgba(255,255,255,.85), 0 0 60px rgba(255,255,255,.4), 0 0 80px rgba(116,248,246,.35);
+}
+
+/* FAQ */
+.faq{ padding:10px; max-height:min(62svh, 520px); overflow:auto }
+.faq::-webkit-scrollbar{ width:8px } .faq::-webkit-scrollbar-thumb{ background:rgba(255,255,255,.15); border-radius:8px }
+.qa{ margin:8px 10px; border:1px solid rgba(255,255,255,.10); background:rgba(255,255,255,.02); border-radius:8px; overflow:hidden }
+.qa[open]{ border-color:rgba(116,248,246,.65); box-shadow:inset 0 0 22px rgba(116,248,246,.18), 0 0 18px rgba(116,248,246,.20) }
+
+.qa summary{
+  list-style:none; cursor:pointer; padding:14px 14px; position:relative;
+  font-weight:600; color:var(--ink); outline:none;
+  display:flex; align-items:center; gap:10px;
+  font-size: var(--fs-qa-q);
+  line-height: 1.35;
+}
+.qa summary::-webkit-details-marker{ display:none }
+
+.qa summary .caret{
+  margin-left:auto; width:8px; height:8px; border-right:2px solid var(--ink); border-top:2px solid var(--ink);
+  transform:rotate(45deg); transition:transform .2s ease; opacity:.85;
+}
+.qa[open] summary .caret{ transform:rotate(225deg) }
+
+.qa .answer{
+  padding:0 14px 14px; font-size: var(--fs-qa-a); line-height:1.7; color:var(--ink-muted)
+}
+
+/* LICENSE */
+.list{ padding:10px; max-height:min(62svh, 520px); overflow:auto }
+.list::-webkit-scrollbar{ width:8px } .list::-webkit-scrollbar-thumb{ background:rgba(255,255,255,.15); border-radius:8px }
+.item{
+  display:grid; grid-template-columns:1fr auto; gap:12px;
+  padding:12px 12px; margin:8px 10px;
+  border:1px solid rgba(255,255,255,.10);
+  background:rgba(255,255,255,.02); border-radius:8px; text-decoration:none; color:inherit;
+}
+.item:hover{ border-color:rgba(116,248,246,.65); box-shadow:inset 0 0 22px rgba(116,248,246,.18), 0 0 18px rgba(116,248,246,.20) }
+.list .item .text{ font-size: var(--fs-lic-item); line-height:1.55; color:var(--ink); font-weight: var(--fw-lic-item); }
+.item .date{ font-size:12px; color:var(--ink-muted); white-space:nowrap; align-self:flex-start }
+
+/* 크레딧/배지 */
+.footer{position:fixed; left:24px; bottom:24px; z-index:2; font-size:13px; color:var(--ink-muted)}
+.footer p{margin:.2em 0}
+.badge{position:fixed; right:8px; top:4px; z-index:3; font:700 10px/1 "Zen Dots",sans-serif; color:#9097a3; letter-spacing:.1em; opacity:.85}
+
+/* 반응형: 좁아지면 세로 스택 */
+@media (max-width: 920px){
+  body{ overflow:auto; }
+  .duo{
+    position:relative; top:auto; left:auto; right:auto;
+    grid-template-columns:1fr; gap:12px;
+    margin:5svh 4vw; width:auto;
+  }
+  .qa, .item{ margin-left:0; margin-right:0; }
+}
+</style>
+</head>
+<body>
+
+<div class="bg" aria-hidden="true"></div>
+
+<div class="orbits" aria-hidden="true">
+  <div class="ring r1"></div><div class="ring r2"></div><div class="ring r3"></div>
+  <div class="ring r4"></div><div class="ring r5"></div><div class="ring r6"></div>
+</div>
+
+<!-- ⬅️ 왼쪽에 몰아넣은 두 패널 -->
+<div class="duo">
+  <aside class="panel">
+    <div class="panel-head">
+      <a class="home" href="../../index.html"><span class="chev"></span> HOME</a>
+      <div class="title">FAQ</div>
+    </div>
+    <div class="faq">
+      <details class="qa" open>
+        <summary>이 프로젝트는 무엇인가요? <span class="caret"></span></summary>
+        <div class="answer">월면계획 v2는 랜딩 → 3D 인터랙션 → 갤러리/라이선스 페이지로 이어지는 실험적 웹입니다.</div>
+      </details>
+      <details class="qa">
+        <summary>사이트가 무겁게 느껴지는 이유가 있나요? <span class="caret"></span></summary>
+        <div class="answer">배경/입자/궤도 애니메이션과 3D 모델이 포함되어 있습니다. 모바일에서는 브라우저 탭을 최소화하고, 배터리 절약 모드에서는 프레임이 제한될 수 있습니다.</div>
+      </details>
+      <details class="qa">
+        <summary>폰트/이미지 등의 출처는 어디에서 볼 수 있나요? <span class="caret"></span></summary>
+        <div class="answer">오른쪽 <b>LICENSE</b> 패널에서 자세한 출처와 라이선스를 확인할 수 있어요.</div>
+      </details>
+      <details class="qa">
+        <summary>문의/피드백은 어디로 보내면 되나요? <span class="caret"></span></summary>
+        <div class="answer">하단 연락처(<code>hobby@114</code>)로 알려주세요. 버그 재현 스텝과 스크린샷을 포함해주시면 빠르게 대응할 수 있습니다.</div>
+      </details>
+      <details class="qa">
+        <summary>소스는 깃허브에 업로드되나요? <span class="caret"></span></summary>
+        <div class="answer">공개 저장소로 정리 예정이며, 배포 브랜치 구조와 에셋 라이선스 정책을 준수해 업로드합니다.</div>
+      </details>
+    </div>
+  </aside>
+
+  <aside class="panel">
+    <div class="panel-head">
+      <a class="home" href="../../index.html"><span class="chev"></span> HOME</a>
+      <div class="title">LICENSE</div>
+    </div>
+    <div class="list">
+      <!-- ① 개요/크레딧 안내 -->
+      <a class="item" href="https://github.com/live-cpu" target="_blank" rel="noopener">
+        <div class="text">개요 및 크레딧</div>
+      </a>
+
+      <!-- ② 배경 우주 텍스처 -->
+      <a class="item" href="https://pixabay.com/videos/nebula-space-universe-galaxy-stars-215697/" target="_blank" rel="noopener">
+        <div class="text">배경 우주 영상 — Pixabay</div>
+      </a>
+
+      <!-- ③ 폰트 -->
+      <a class="item" href="https://fonts.google.com/specimen/Zen+Dots" target="_blank" rel="noopener">
+        <div class="text">폰트 <b>Zen Dots</b> / <b>Noto Sans KR</b> — Google Fonts</div>
+      </a>
+
+      <!-- ④ 기타 리소스 -->
+      <a class="item" href="https://sketchfab.com/3d-models/solar-system-animation-b7c69a6b655b47c99f871d5ec5aee854" target="_blank" rel="noopener">
+        <div class="text">Universe 3D Modeling — Sketchfab</div>
+      </a>
+
+      <!-- ⑤ 기타 리소스 -->
+      <a class="item" href="https://opengameart.org/content/spaceships-32x32" target="_blank" rel="noopener">
+        <div class="text">2D Sprite Spaceship — OpenGameArt</div>
+      </a>
+
+      <!-- 6 기타 리소스 -->
+      <a class="item" href="https://github.com/lovasoa/whitebophir" target="_blank" rel="noopener">
+        <div class="text">Whitebophir 화이트보드 캔버스</div>
+      </a>
+
+    </div>
+  </aside>
+</div>
+
+<div class="footer">
+  <p>all rights reserved on FF14</p>
+  <p>contact : hobby@114</p>
+</div>
+<div class="badge">GAS</div>
+
+<script type="module" src="../../src/set-bg.js"></script>
+</body>
+</html>
