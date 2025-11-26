@@ -1,0 +1,227 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>월면계획 v2 — Main</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <!-- Zen Dots + Noto Sans KR(400/500/600/700) -->
+  <link href="https://fonts.googleapis.com/css2?family=Zen+Dots&family=Noto+Sans+KR:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- 패널/표 스타일 -->
+
+  <style>
+    :root{ --ink:#f4f7fb; --ink-muted:#b7c0cf; --accent:#74F8F6; }
+    *{ box-sizing:border-box }
+    html,body{ height:100% }
+    body{
+      margin:0; color:var(--ink); background:#07080b;
+      font-family:"Noto Sans KR",system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+      overflow:hidden;
+    }
+
+    /* 배경 */
+    .bgvid{
+      position:fixed; inset:0; width:100%; height:100%; object-fit:cover; z-index:0;
+      filter:brightness(.95) contrast(1.05);
+    }
+    .bg{
+      position:fixed; inset:0; z-index:1;
+      background-image:
+        radial-gradient(1200px 800px at 70% 30%, rgba(0,0,0,.2), rgba(0,0,0,0) 60%),
+        linear-gradient(180deg, rgba(0,0,0,.55), rgba(0,0,0,.35) 40%, rgba(0,0,0,.65));
+      pointer-events:none;
+    }
+
+    /* 3D 캔버스 */
+    #stage{ position:fixed; inset:0; z-index:2; display:block; }
+
+    .badge{ position:fixed; right:8px; top:4px; z-index:3; font:700 10px/1 "Zen Dots",sans-serif; color:#9097a3; letter-spacing:.1em; opacity:.85 }
+ /* 3D 토글 버튼 */
+    .toggle-3d{
+      position:fixed; right:16px; top:16px; z-index:9999;
+      display:inline-flex; align-items:center; gap:8px; height:28px; padding:0 12px;
+      font:700 11px/1 "Zen Dots",sans-serif; letter-spacing:.12em; cursor:pointer;
+      color:#9adfe3; background:rgba(255,255,255,.03);
+      border:1px solid rgba(130,255,250,.35); border-radius:6px;
+    }
+    .toggle-3d:hover{ background:rgba(255,255,255,.06) }
+    
+/* 3D 숨김 상태 - 캔버스는 보이되 모델만 숨김 */
+    body.hide-3d .bg{ display:none !important; }
+
+
+    /* HOME 드롭다운 */
+    .home-dd{ position:fixed; left:16px; top:16px; z-index:9999 }
+    .home-toggle{
+      display:inline-flex; align-items:center; gap:8px; height:28px; padding:0 12px;
+      font:700 11px/1 "Zen Dots",sans-serif; letter-spacing:.12em; cursor:pointer;
+      color:#9adfe3; background:rgba(255,255,255,.03);
+      border:1px solid rgba(130,255,250,.35); border-radius:6px;
+    }
+    .home-toggle:hover{ background:rgba(255,255,255,.06) }
+    .home-toggle .chev{
+      width:8px; height:8px; transform:rotate(135deg);
+      border-top:2px solid currentColor; border-right:2px solid currentColor;
+    }
+    .home-menu{
+      position:absolute; left:0; top:34px; min-width:180px;
+      list-style:none; margin:6px 0 0; padding:6px;
+      background:rgba(0,0,0,.78); border:1px solid rgba(130,255,250,.35); border-radius:10px;
+      display:none;
+    }
+    .home-dd.open .home-menu{ display:block }
+    .home-menu a{
+      display:block; padding:8px 10px; color:#dff; text-decoration:none; border-radius:8px;
+      font:700 11px/1 "Zen Dots",sans-serif; letter-spacing:.08em;
+    }
+    .home-menu a:hover{ background:rgba(255,255,255,.08) }
+  </style>
+  <script type="module" crossorigin src="/moon.ver2/assets/pm_main-Cn_TICFn.js"></script>
+  <link rel="modulepreload" crossorigin href="/moon.ver2/assets/modulepreload-polyfill-B5Qt9EMX.js">
+  <link rel="modulepreload" crossorigin href="/moon.ver2/assets/three-DXSWiGeG.js">
+  <link rel="stylesheet" crossorigin href="/moon.ver2/assets/pm_main-BzVxf_dU.css">
+</head>
+<body>
+  <!-- 비디오/글로우 배경 -->
+  <video id="bgvid" class="bgvid" muted playsinline autoplay loop preload="auto"></video>
+  <div class="bg" aria-hidden="true"></div>
+
+  <!-- HOME 드롭다운 -->
+  <div class="home-dd" id="homeDd">
+    <button class="home-toggle" id="homeToggle" aria-haspopup="true" aria-expanded="false">
+      <span class="chev"></span> HOME ▾
+    </button>
+    <ul class="home-menu" id="homeMenu" role="menu">
+      <li><a id="goCanvas"  href="#" role="menuitem">CANVAS</a></li>
+      <li><a id="goLicense" href="#" role="menuitem">LICENSE</a></li>
+    </ul>
+  </div>
+
+  <!-- 3D 캔버스 -->
+  <canvas id="stage"></canvas>
+  <div class="badge">GAS</div>
+  <button class="toggle-3d" id="toggle3d" aria-label="Toggle 3D View">
+    <span id="toggle3d-text">SHOW 3D</span>
+  </button>
+  <!-- LP 패널 -->
+  <div id="lp-root">
+    <div class="lp-stack">
+      <!-- UP -->
+      <section class="lp lp-up">
+        <div class="lp-head">
+          <div class="lp-tabs" role="tablist">
+            <button class="lp-tab" data-lp-tab="tonbery">T</button>
+            <button class="lp-tab" data-lp-tab="chocobo">H</button>
+            <button class="lp-tab" data-lp-tab="carbuncle">C</button>
+            <button class="lp-tab" data-lp-tab="fenrir">F</button>
+            <button class="lp-tab" data-lp-tab="moogle">M</button>
+          </div>
+          <span class="lp-updated-mini" id="lp-updated-mini"></span>
+        </div>
+
+        <div class="lp-body">
+          <h2 class="lp-title"><span id="lp-top-title">-</span></h2>
+          <div class="lp-sep"></div>
+
+          <div class="lp-row">
+            <div class="label">LOCATION</div>
+            <div class="value" id="lp-top-location">-</div>
+          </div>
+
+          <div class="lp-row lp-row--bar">
+            <div class="label">DISTANCE</div>
+            <div class="value">
+              <button class="sw" id="lp-dec" data-admin-only aria-label="Decrease">−</button>
+              <div class="bar" id="lp-top-distance-bar" style="--pct:0"><i></i></div>
+              <button class="sw" id="lp-inc" data-admin-only aria-label="Increase">＋</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- DOWN: 댓글 -->
+      <section class="lp lp-down">
+        <div class="lp-head lp-cmt-head">
+          <span class="lp-kicker">COMMENTS</span>
+          <select id="lp-comment-scope" aria-label="댓글 필터">
+            <option value="all">all</option>
+            <option value="tonbery">tonbery</option>
+            <option value="chocobo">chocobo</option>
+            <option value="carbuncle">carbuncle</option>
+            <option value="fenrir">fenrir</option>
+            <option value="moogle">moogle</option>
+          </select>
+        </div>
+        <div class="lp-body">
+          <div class="lp-cmt-scroll">
+  <ul id="lp-comments" class="lp-comments" role="list"></ul>
+</div>
+          <form id="lp-comment-form" class="lp-input">
+            <input id="lp-comment-input" placeholder="댓글을 입력하세요" maxlength="500" autocomplete="off" aria-label="댓글 입력" />
+            <button type="submit">SEND</button>
+          </form>
+        </div>
+      </section>
+
+      <!-- MIDDLE: WHOLE -->
+      <section class="lp lp-mid">
+        <div class="lp-head lp-mid-head">
+          <div class="lp-title">WHOLE</div>
+        </div>
+        <div class="lp-body">
+          <div id="mpv2-progress-root"></div>
+        </div>
+      </section>
+    </div>
+
+    <!-- 관리자 패널 -->
+    <div class="lp-admin-panel" style="display:flex;gap:8px" data-admin-only>
+      <span id="lp-admin-status">로그아웃</span>
+      <button id="lp-admin-login">Admin Login</button>
+      <button id="lp-admin-logout">Logout</button>
+    </div>
+  </div>
+
+  <!-- 앱 스크립트 -->
+
+  <!-- HOME 드롭다운 링크/토글 -->
+ <!-- 3D 토글 스크립트 -->
+  <script>
+    const toggle3dBtn = document.getElementById('toggle3d');
+    const toggle3dText = document.getElementById('toggle3d-text');
+    
+    const saved3dState = localStorage.getItem('hide3d') !== 'false';
+    if (saved3dState) {
+      document.body.classList.add('hide-3d');
+      toggle3dText.textContent = 'SHOW 3D';
+    } else {
+      toggle3dText.textContent = 'HIDE 3D';
+    }
+
+    toggle3dBtn.addEventListener('click', () => {
+      const willHide = !document.body.classList.contains('hide-3d');
+      
+      if (willHide) {
+        // 3D 숨기기
+        document.body.classList.add('hide-3d');
+        toggle3dText.textContent = 'SHOW 3D';
+        localStorage.setItem('hide3d', 'true');
+        alert('3D 모델을 숨겼습니다. 새로고침해주세요.');
+      } else {
+        // 3D 보이기
+        document.body.classList.remove('hide-3d');
+        toggle3dText.textContent = 'HIDE 3D';
+        localStorage.setItem('hide3d', 'false');
+        alert('3D 모델을 표시합니다. 새로고침해주세요.');
+      }
+      
+      // 페이지 새로고침
+      setTimeout(() => location.reload(), 500);
+    });
+  </script>
+
+</body>
+</html>
