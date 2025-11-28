@@ -1,0 +1,70 @@
+import {
+	CustomEmbedDefinition,
+	DEFAULT_EMBED_DEFINITIONS,
+	Tldraw,
+} from 'tldraw'
+import 'tldraw/tldraw.css'
+
+// 1. 기본 임베드 정의를 모두 가져오고, CustomEmbedDefinition을 함께 정의합니다.
+//    (이전에 'tldraw', 'youtube'만 남기던 필터링 코드를 제거했습니다.)
+const defaultEmbedsToKeep = DEFAULT_EMBED_DEFINITIONS; 
+
+// 2. 기존 JSFiddle 임베드 정의
+const jsfiddleEmbed: CustomEmbedDefinition = {
+	type: 'jsfiddle',
+	title: 'JSFiddle',
+	hostnames: ['jsfiddle.net'],
+	minWidth: 300,
+	minHeight: 300,
+	width: 720,
+	height: 500,
+	doesResize: true,
+	toEmbedUrl: (url) => {
+		const urlObj = new URL(url)
+		const matches = urlObj.pathname.match(/\/([^/]+)\/([^/]+)\/(\d+)\/embedded/)
+		if (matches) {
+			return `https://jsfiddle.net/${matches[1]}/${matches[2]}/embedded/`
+		}
+		return
+	},
+	fromEmbedUrl: (url) => {
+		const urlObj = new URL(url)
+		const matches = urlObj.pathname.match(/\/([^/]+)\/([^/]+)\/(\d+)\/embedded/)
+		if (matches) {
+			return `https://jsfiddle.net/${matches[1]}/${matches[2]}/`
+		}
+		return
+	},
+	icon: 'https://jsfiddle.net/img/favicon.png',
+}
+
+// 3. ✨ WBO (Whiteboard) 임베드 정의 추가 (핵심 수정 사항) ✨
+const wboEmbed: CustomEmbedDefinition = {
+	type: 'wbo',
+	title: 'Whiteboard',
+    // 임베드할 WBO 서버의 도메인을 명시합니다.
+    // 공식 서버: wbo.ophir.dev
+	hostnames: ['wbo.ophir.dev'], 
+	minWidth: 300,
+	minHeight: 300,
+	width: 720,
+	height: 500,
+	doesResize: true,
+    // WBO는 주소 변환 없이 URL 자체를 임베드 URL로 사용합니다.
+	toEmbedUrl: (url) => url, 
+	fromEmbedUrl: (url) => url,
+	icon: 'https://wbo.ophir.dev/favicon.ico',
+}
+
+
+// 4. 모든 임베드 정의를 Tldraw 컴포넌트에 전달
+//    (기본 정의 + JSFiddle + WBO)
+const embeds = [...defaultEmbedsToKeep, jsfiddleEmbed, wboEmbed]
+
+export default function CustomEmbedExample() {
+	return (
+		<div className="tldraw__editor">
+			<Tldraw embeds={embeds} />
+		</div>
+	)
+}
